@@ -14,7 +14,7 @@ class Item {
         this.description = description;
     }
 
-    itemElement(): HTMLElement {
+    public itemElement(): HTMLElement {
         const itemDiv = document.createElement("div");
         itemDiv.classList.add("item-card");
 
@@ -62,15 +62,15 @@ class User {
         this.cart = [];
     }
 
-    addToCart(item: Item): void {
+    public addToCart(item: Item): void {
         this.cart.push(item);
     }
 
-    removeFromCart(item: Item): void {
+    public removeFromCart(item: Item): void {
         this.cart = this.cart.filter(cartItem => cartItem.id !== item.id);
     }
 
-    removeQuantityFromCart(item: Item, quantity: number): void {
+     public removeQuantityFromCart(item: Item, quantity: number): void {
         for (let i = 0; i < quantity; i++) {
             const index = this.cart.findIndex(cartItem => cartItem.id === item.id);
             if (index !== -1) {
@@ -79,11 +79,11 @@ class User {
         }
     }
 
-    cartTotal(): number {
+    public cartTotal(): number {
         return this.cart.reduce((total, item) => total + item.price, 0);
     }
 
-    cartHTMLElement(): HTMLElement {
+    public cartHTMLElement(): HTMLElement {
         const cartDiv = document.createElement("div");
         cartDiv.classList.add("cart-items");
         for (const item of this.cart) {
@@ -122,7 +122,7 @@ class User {
         return cartDiv;
     }
 
-    addRemoveEventListeners(): void {
+     public addRemoveEventListeners(): void {
         const cartItems = document.querySelectorAll(".cart-item");
         cartItems.forEach(item => {
             const removeButtons = item.querySelectorAll("button");
@@ -168,7 +168,7 @@ class Shop {
         Shop.showItems();
     }
 
-    static createCart(): void {
+     public static createCart(): void {
         const cartDiv = document.getElementById("cart");
         if (cartDiv) {
             cartDiv.innerHTML = "";
@@ -181,7 +181,7 @@ class Shop {
         }
     }
 
-    static showItems(): void {
+    public static showItems(): void {
         const shopDiv = document.getElementById("shop");
         if (shopDiv) {
             shopDiv.innerHTML = "";
@@ -192,7 +192,7 @@ class Shop {
         }
     }
 
-    static updateCart(): void {
+    public static updateCart(): void {
         const cartSection = document.getElementById("cart");
         if (cartSection) {
             cartSection.innerHTML = "";

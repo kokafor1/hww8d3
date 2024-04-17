@@ -998,9 +998,6 @@ class Item {
     }
 }
 class User {
-    static createUser() {
-        throw new Error('Method not implemented.');
-    }
     constructor(name, age) {
         this.id = (0, uuid_1.v4)();
         this.name = name;
@@ -1054,6 +1051,28 @@ class User {
         cartDiv.appendChild(cartTotal);
         return cartDiv;
     }
+    static createUser() {
+        const nameInput = document.getElementById("name");
+        const ageInput = document.getElementById("age");
+        const name = nameInput.value.trim();
+        const age = parseInt(ageInput.value.trim());
+        if (name && age) {
+            return new User(name, age);
+        }
+        else {
+            alert("Please provide valid name and age.");
+            return undefined;
+        }
+    }
+    static loginUser(event) {
+        var _a;
+        event.preventDefault();
+        Shop.myUser = User.createUser();
+        if (Shop.myUser) {
+            (_a = document.getElementById('login')) === null || _a === void 0 ? void 0 : _a.remove();
+            new Shop();
+        }
+    }
     addRemoveEventListeners() {
         const cartItems = document.querySelectorAll(".cart-item");
         cartItems.forEach(item => {
@@ -1077,17 +1096,8 @@ class User {
     }
 }
 class Shop {
-    static loginUser(event) {
-        var _a;
-        event.preventDefault();
-        Shop.myUser = User.createUser();
-        if (Shop.myUser) {
-            (_a = document.getElementById('login')) === null || _a === void 0 ? void 0 : _a.remove();
-            new Shop();
-        }
-    }
     constructor() {
-        Shop.items.push(new Item('Laptop', 600.95, 'For learning'), new Item('Shoes', 200.45, 'Jordan retro 4s'), new Item('iPhone', 1001.23, 'Everyday need'));
+        Shop.items.push(new Item('Laptop', 600.95, 'For learning'), new Item('Shoes', 200.45, 'Jordan retro 4s'), new Item('iPhone', 1001.23, 'Everyday need'), new Item('Watch', 350.00, 'Luxury timepiece'), new Item('Camera', 800.00, 'Professional camera for photography enthusiasts'), new Item('Speaker', 150.00, 'High-quality sound system for immersive audio experience'));
         Shop.createCart();
         Shop.showItems();
     }
@@ -1124,6 +1134,7 @@ class Shop {
     }
 }
 Shop.items = [];
+document.getElementById('loginbutton').addEventListener('click', (event) => User.loginUser(event));
 
 })();
 

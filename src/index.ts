@@ -1,4 +1,3 @@
-
 import { v4 as uuidv4 } from 'uuid';
 
 class Item {
@@ -47,9 +46,6 @@ class Item {
 }
 
 class User {
-    static createUser(): User | undefined {
-        throw new Error('Method not implemented.');
-    }
     readonly id: string;
     name: string;
     age: number;
@@ -70,7 +66,7 @@ class User {
         this.cart = this.cart.filter(cartItem => cartItem.id !== item.id);
     }
 
-     public removeQuantityFromCart(item: Item, quantity: number): void {
+    public removeQuantityFromCart(item: Item, quantity: number): void {
         for (let i = 0; i < quantity; i++) {
             const index = this.cart.findIndex(cartItem => cartItem.id === item.id);
             if (index !== -1) {
@@ -122,7 +118,31 @@ class User {
         return cartDiv;
     }
 
-     public addRemoveEventListeners(): void {
+    static createUser(): User | undefined {
+        const nameInput = <HTMLInputElement>document.getElementById("name");
+        const ageInput = <HTMLInputElement>document.getElementById("age");
+        
+        const name = nameInput.value.trim();
+        const age = parseInt(ageInput.value.trim());
+        
+        if (name && age) {
+            return new User(name, age);
+        } else {
+            alert("Please provide valid name and age.");
+            return undefined;
+        }
+    }
+
+    static loginUser(event: Event): void {
+        event.preventDefault();
+        Shop.myUser = User.createUser();
+        if (Shop.myUser) {
+            document.getElementById('login')?.remove();
+            new Shop();
+        }
+    }
+
+    public addRemoveEventListeners(): void {
         const cartItems = document.querySelectorAll(".cart-item");
         cartItems.forEach(item => {
             const removeButtons = item.querySelectorAll("button");
@@ -147,28 +167,21 @@ class Shop {
     static myUser: User | undefined;
     static items: Item[] = [];
 
-    static loginUser(event: Event): void {
-        event.preventDefault();
-        Shop.myUser = User.createUser();
-        if (Shop.myUser) {
-            document.getElementById('login')?.remove();
-            new Shop();
-        }
-    }
-    
-
     constructor() {
         Shop.items.push(
             new Item('Laptop', 600.95, 'For learning'),
             new Item('Shoes', 200.45, 'Jordan retro 4s'),
-            new Item('iPhone', 1001.23, 'Everyday need')
+            new Item('iPhone', 1001.23, 'Everyday need'),
+            new Item('Watch', 350.00, 'Luxury timepiece'),
+            new Item('Camera', 800.00, 'Professional camera for photography enthusiasts'),
+            new Item('Speaker', 150.00, 'High-quality sound system for immersive audio experience')
         );
 
         Shop.createCart();
         Shop.showItems();
     }
 
-     public static createCart(): void {
+    public static createCart(): void {
         const cartDiv = document.getElementById("cart");
         if (cartDiv) {
             cartDiv.innerHTML = "";
@@ -201,3 +214,4 @@ class Shop {
     }
 }
 
+document.getElementById('loginbutton')!.addEventListener('click', (event: Event) => User.loginUser(event));

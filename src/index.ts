@@ -49,40 +49,50 @@ class User {
     readonly id: string;
     name: string;
     age: number;
-    cart: Item[];
+    cart: Map<string, { item: Item, quantity: number }>;
 
     constructor(name: string, age: number) {
         this.id = uuidv4();
         this.name = name;
         this.age = age;
-        this.cart = [];
+        this.cart = new Map();
     }
 
     public addToCart(item: Item): void {
-        this.cart.push(item);
+        if (this.cart.has(item.id)) {
+            this.cart.get(item.id)!.quantity++;
+        } else {
+            this.cart.set(item.id, { item: item, quantity: 1 });
+        }
     }
 
     public removeFromCart(item: Item): void {
-        this.cart = this.cart.filter(cartItem => cartItem.id !== item.id);
-    }
-
-    public removeQuantityFromCart(item: Item, quantity: number): void {
-        for (let i = 0; i < quantity; i++) {
-            const index = this.cart.findIndex(cartItem => cartItem.id === item.id);
-            if (index !== -1) {
-                this.cart.splice(index, 1);
+        if (this.cart.has(item.id)) {
+            const currentItem = this.cart.get(item.id)!;
+            if (currentItem.quantity === 1) {
+                this.cart.delete(item.id);
+            } else {
+                currentItem.quantity--;
             }
         }
     }
 
+    public removeAllFromCart(item: Item): void {
+        this.cart.delete(item.id);
+    }
+
     public cartTotal(): number {
-        return this.cart.reduce((total, item) => total + item.price, 0);
+        let total = 0;
+        for (const { item, quantity } of this.cart.values()) {
+            total += item.price * quantity;
+        }
+        return total;
     }
 
     public cartHTMLElement(): HTMLElement {
         const cartDiv = document.createElement("div");
         cartDiv.classList.add("cart-items");
-        for (const item of this.cart) {
+        for (const { item, quantity } of this.cart.values()) {
             const itemDiv = document.createElement("div");
             itemDiv.classList.add("cart-item");
 
@@ -90,22 +100,29 @@ class User {
             itemName.textContent = item.name;
             itemDiv.appendChild(itemName);
 
+
             const itemQuantity = document.createElement("span");
-            itemQuantity.textContent = `Quantity: ${this.cart.filter(i => i.id === item.id).length}`;
+            itemQuantity.textContent = `Quantity: ${quantity}`;
             itemDiv.appendChild(itemQuantity);
 
             const itemPrice = document.createElement("span");
-            itemPrice.textContent = `Price: $${item.price.toFixed(2)}`;
+            itemPrice.textContent = `Price: $${(item.price * quantity).toFixed(2)}`;
             itemDiv.appendChild(itemPrice);
 
             const removeButton = document.createElement("button");
             removeButton.textContent = "Remove One";
-            removeButton.addEventListener("click", () => this.removeFromCart(item));
+            removeButton.addEventListener("click", () => {
+            this.removeFromCart(item);
+            Shop.updateCart(); 
+            });
             itemDiv.appendChild(removeButton);
 
             const removeAllButton = document.createElement("button");
             removeAllButton.textContent = "Remove All";
-            removeAllButton.addEventListener("click", () => this.removeQuantityFromCart(item, this.cart.filter(i => i.id === item.id).length));
+            removeAllButton.addEventListener("click", () => {
+                this.removeAllFromCart(item);
+                Shop.updateCart();
+            });
             itemDiv.appendChild(removeAllButton);
 
             cartDiv.appendChild(itemDiv);
@@ -149,12 +166,14 @@ class User {
             removeButtons.forEach(button => {
                 button.addEventListener("click", () => {
                     const itemName = item.querySelector("h3")?.textContent;
-                    const itemToRemove = this.cart.find(i => i.name === itemName);
+                    const itemToRemove = [...this.cart.values()].find(i => i.item.name === itemName)?.item;
                     if (itemToRemove) {
                         if (button.textContent === "Remove One") {
                             this.removeFromCart(itemToRemove);
+                            Shop.updateCart();
                         } else {
-                            this.removeQuantityFromCart(itemToRemove, this.cart.filter(i => i.id === itemToRemove.id).length);
+                            this.removeAllFromCart(itemToRemove);
+                            Shop.updateCart();
                         }
                     }
                 });
@@ -162,6 +181,7 @@ class User {
         });
     }
 }
+
 
 class Shop {
     static myUser: User | undefined;
